@@ -1,26 +1,50 @@
+<?php
+session_start();
+
+require_once 'security.php';
+require_once 'UserLogic.php';
+
+$result = UserLogic::checkLogin();
+if($result){
+  header('Location: mypage.php');
+  return;
+}
+
+
+$login_err = isset($_SESSION['login_err']) ? $_SESSION['login_err'] : null;
+unset($_SESSION['login_err']);
+?>
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>shop</title>
+  <title>ユーザ登録画面</title>
 </head>
 <body>
-
-<h1>商品画面</h1>
-<p>商品名を入力してください</p>
-<form action="search.php" method="POST">
-  <input type="text" name="keyword">
-  <input type="submit" value="検索">
-</form>
-
-<?php
-    $pdo = new PDO('mysql:host=localhost;dbname=shop;charset=utf8', 'staff', 'password');
-    foreach($pdo -> query('SELECT * FROM product') as $row){
-      echo "<p>{$row['id']}:{$row['name']}:{$row['price']}円:残り{$row['stock']}個</p>";
-    }
-?>
-
-<p><a href="admin.php">管理者画面へ</a></p>
+  <h2>ユーザ登録フォーム</h2>
+  <?php if(isset($err['$login_err'])) : ?>
+    <p><?php echo $err['$login_err']; ?></p>
+  <?php endif; ?>
+  <form action="register.php" method="POST">
+    <p>
+      <label for="username">ユーザ名:</label>
+      <input type="text" name="username">
+    </p>
+    <p>
+      <label for="password">パスワード:</label>
+      <input type="password" name="password">
+    </p>
+    <p>
+      <label for="password_conf">パスワード確認:</label>
+      <input type="password" name="password_conf">
+    </p>
+    <input type="hidden" name="csrf_token" value="<?php echo h(setToken()); ?>">
+    <p>
+      <input type="submit" value="新規登録">
+    </p>
+  </form>
+  <a href="login_form.php">ログインする</a>
 </body>
 </html>
